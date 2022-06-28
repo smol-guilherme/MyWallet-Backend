@@ -10,4 +10,4 @@ server.use(cors());
 server.use(json());
 server.use("/", router);
 
-server.listen(PORT_IN_USE, () => console.log(`Server up and running @${Date().toString()}`))
+server.listen(PORT_IN_USE, () => console.log(`Server up and running @${Date().toString()} from port ${PORT_IN_USE}`))
