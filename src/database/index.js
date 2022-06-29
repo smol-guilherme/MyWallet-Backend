@@ -1,4 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
+import { compareSync } from "bcrypt";
 import 'dotenv/config';
 
 const URL = process.env.MONGO_URL;
@@ -18,19 +19,21 @@ async function connectToDb() {
     }
 }
 
-function userLogin(credentials) {
-    const user = getUser(credentials.email);
-    if(user.password === credentials.password) {
+async function userLogin(credentials) {
+    const user = await getUser(credentials.email);
+    if(user === null) {
+        return null;
+    }
+    if(compareSync(credentials.password, user.password)) {
         return user;
     }
-    return null;
+    return false;
 }
 
 async function getUser(userEmail) {
     try {
         const db = await connectToDb();
         const user = await db.collection(USER_COLLECTION).findOne({ email: userEmail });
-        console.log(user);
         client.close();
         return user;
     } catch (err) {
