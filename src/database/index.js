@@ -28,8 +28,8 @@ export async function validateUserLogin(credentials) {
         return null;
     }
     if(compareSync(credentials.password, user.password)) {
-        const sessionToken = addSessionToken(user);
-        return sessionToken;
+        const sessionData = addSessionToken(user);
+        return sessionData;
     }
     return false;
 }
@@ -50,9 +50,10 @@ async function addSessionToken(user) {
     try {
         const db = await connectToDb();
         user.token = uuid();
-        const response = {...user};
+        const session = {...user};
         await db.collection(SESSION_COLLECTION).insertOne({ userId: ObjectId(response._id), token: response.token });
-        return response.token;
+        const response = { ...session.name, ...session.token }
+        return response;
     } catch(err) {
         console.log(err)
         return null;

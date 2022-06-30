@@ -2,14 +2,14 @@ import { validateUserLogin, userRegister } from "../database/index.js";
 
 export async function userLogin(req, res) {
   const credentials = req.body;
-  const response = await validateUserLogin(credentials);
-  if (response === null) {
+  const data = await validateUserLogin(credentials);
+  if (data === null) {
     return res.status(404).send("Usuário não encontrado");
   }
-  if (response === false) {
+  if (data === false) {
     return res.status(409).send("E-mail ou senha incorretos");
   }
-  return res.status(200).send(response);
+  return res.status(200).send(data);
 }
 
 export async function userSignup(req, res) {
