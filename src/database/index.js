@@ -1,12 +1,15 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { compareSync } from "bcrypt";
+import { compareSync, hashSync } from "bcrypt";
+import { v4 as uuid } from "uuid";
 import 'dotenv/config';
 
 const URL = process.env.MONGO_URL;
 const PORT = process.env.MONGO_PORT;
 const DB_NAME = process.env.MONGO_DB_NAME;
-const MESSAGE_COLLECTION = process.env.MONGO_DATA_COLLECTION;
 const USER_COLLECTION = process.env.MONGO_USERS_COLLECTION;
+const MESSAGE_COLLECTION = process.env.MONGO_DATA_COLLECTION;
+const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
+const SEC_FACTOR = 10;
 
 const client = new MongoClient(`mongodb://${URL}:${PORT}`);
 
@@ -19,13 +22,14 @@ async function connectToDb() {
     }
 }
 
-async function userLogin(credentials) {
+export async function validateUserLogin(credentials) {
     const user = await getUser(credentials.email);
     if(user === null) {
         return null;
     }
     if(compareSync(credentials.password, user.password)) {
-        return user;
+        const sessionToken = addSessionToken(user);
+        return sessionToken;
     }
     return false;
 }
@@ -42,18 +46,26 @@ async function getUser(userEmail) {
     }
 }
 
-async function userRegister(credentials) {
-    if(await getUser(credentials.email) !== null) {
+async function addSessionToken(user) {
+    try {
+        const db = await connectToDb();
+        user.token = uuid();
+        const response = {...user};
+        await db.collection(SESSION_COLLECTION).insertOne({ userId: ObjectId(response._id), token: response.token });
+        return response.token;
+    } catch(err) {
+        console.log(err)
         return null;
     }
-    const db = await connectToDb();
-    await db.collection(USER_COLLECTION).insertOne(credentials);
-    client.close();
-    return true;
 }
 
-const database = {
-    userRegister,
-    userLogin
-};
-export default database;
+export async function userRegister(credentials) {
+    if(await getUser(credentials.email) !== null) {
+        return false;
+    }
+    const db = await connectToDb();
+    credentials.password = hashSync(credentials.password, SEC_FACTOR);
+    await db.collection(USER_COLLECTION).insertOne(credentials);
+    client.close();
+    return null;
+}
