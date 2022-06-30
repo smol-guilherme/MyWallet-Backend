@@ -48,9 +48,7 @@ export async function userRegister(credentials) {
 export async function validateUserToken(token) {
   try {
     const db = await connectToDb();
-    const response = await db
-      .collection(SESSION_COLLECTION)
-      .findOne({ token: token });
+    const response = await db.collection(SESSION_COLLECTION).findOne({ token: token });
     if (response !== null) {
       return response._id;
     }
@@ -76,8 +74,8 @@ export async function postEntry(uid, data) {
   try {
     const db = await connectToDb();
     const entry = { uid, data }
-    console.log(entry);
-    const response = await db.collection(ENTRIES_COLLECTION).addOne(entry);
+    await db.collection(ENTRIES_COLLECTION).insertOne(entry);
+    const response = await db.collection(ENTRIES_COLLECTION).find({}).toArray();
     return response;
   } catch (err) {
     console.log(err);

@@ -1,24 +1,22 @@
-import { validateUserToken } from "../database/index.js";
+import { postEntry, validateUserToken } from "../database/index.js";
 
 export async function newDataEntry(req, res) {
   const newEntry = req.body;
   const userToken = req.header('Authorization').replace("Bearer ", "");
-  console.log(userToken);
-  if (!checkTokenValidity()) {
+  const tokenResponse = await validateUserToken(userToken);
+  if (tokenResponse === null) {
     return false;
   }
-  return res.status(409).send();
+  const response = postEntry(tokenResponse, newEntry);
+  return res.status(201).send(response);
 }
 
-export async function getDataEntries() {
-  if (!checkTokenValidity()) {
+export async function getDataEntries(req, res) {
+  const userToken = req.header('Authorization').replace("Bearer ", "");
+  if (await !validateUserToken(userToken)) {
     return false;
   }
   const response = getEntries();
   console.log(response);
   return response;
-}
-
-function checkTokenValidity() {
-  return validateUserToken();
 }
