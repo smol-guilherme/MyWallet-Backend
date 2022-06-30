@@ -50,7 +50,8 @@ export async function validateUserToken(token) {
     const db = await connectToDb();
     const response = await db.collection(SESSION_COLLECTION).findOne({ token: token });
     if (response !== null) {
-      return response._id;
+      const user = await db.collection(USER_COLLECTION).findOne({})
+      return user._id;
     }
     return response;
   } catch (err) {
@@ -62,7 +63,9 @@ export async function validateUserToken(token) {
 export async function getEntries(uid) {
   try {
     const db = await connectToDb();
-    const response = await db.collection(ENTRIES_COLLECTION).findMany({ _id: ObjectId(uid)}).toArray();
+    console.log('userid', uid);
+    const response = await db.collection(ENTRIES_COLLECTION).find({ uid: ObjectId(uid)}).toArray();
+    console.log(response);
     return response;
   } catch (err) {
     console.log(err);
@@ -73,7 +76,8 @@ export async function getEntries(uid) {
 export async function postEntry(uid, data) {
   try {
     const db = await connectToDb();
-    const entry = { uid, data }
+    const entry = { uid, data };
+    console.log(entry);
     await db.collection(ENTRIES_COLLECTION).insertOne(entry);
     const response = await db.collection(ENTRIES_COLLECTION).find({}).toArray();
     return response;
@@ -90,6 +94,7 @@ async function getUser(userEmail) {
       .collection(USER_COLLECTION)
       .findOne({ email: userEmail });
     client.close();
+    console.log(user._id);
     return user;
   } catch (err) {
     console.log(err);
@@ -101,13 +106,12 @@ async function addSessionToken(user) {
   try {
     const db = await connectToDb();
     user.token = uuid();
-    const session = { ...user };
     await db
       .collection(SESSION_COLLECTION)
-      .insertOne({ userId: ObjectId(session._id), token: session.token });
+      .insertOne({ userId: ObjectId(user._id), token: user.token });
     const response = {
-      name: session.name,
-      token: session.token,
+      name: user.name,
+      token: user.token,
     };
     return response;
   } catch (err) {
