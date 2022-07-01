@@ -1,7 +1,7 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { compareSync, hashSync } from "bcrypt";
 import { v4 as uuid } from "uuid";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 import "dotenv/config";
 
 const URL = process.env.MONGO_URL;
@@ -49,9 +49,11 @@ export async function userRegister(credentials) {
 export async function validateUserToken(token) {
   try {
     const db = await connectToDb();
-    const response = await db.collection(SESSION_COLLECTION).findOne({ token: token });
+    const response = await db
+      .collection(SESSION_COLLECTION)
+      .findOne({ token: token });
     if (response !== null) {
-      const user = await db.collection(USER_COLLECTION).findOne({})
+      const user = await db.collection(USER_COLLECTION).findOne({});
       return user._id;
     }
     return response;
@@ -64,9 +66,17 @@ export async function validateUserToken(token) {
 export async function getEntries(uid) {
   try {
     const db = await connectToDb();
-    console.log('userid', uid);
-    const response = await db.collection(ENTRIES_COLLECTION).find({ uid: ObjectId(uid)}).toArray();
-    console.log(response);
+    console.log("userid", uid);
+    const responseData = await db
+      .collection(ENTRIES_COLLECTION)
+      .aggregate([
+        { $match: {} },
+        { $group: { _id: "$uid", total: { $sum: "$data.value" }, data: { $push: "$data" } } },
+      ])
+      .toArray();
+      delete responseData[0]._id
+      const response = {...responseData[0]}
+      console.log(response);
     return response;
   } catch (err) {
     console.log(err);
@@ -77,9 +87,9 @@ export async function getEntries(uid) {
 export async function postEntry(uid, data) {
   try {
     const db = await connectToDb();
-    const entry = { 
+    const entry = {
       uid: uid,
-      data: {...data, date: dayjs().format("DD/MM")}
+      data: { ...data, date: dayjs().format("DD/MM") },
     };
     console.log(entry);
     await db.collection(ENTRIES_COLLECTION).insertOne(entry);
