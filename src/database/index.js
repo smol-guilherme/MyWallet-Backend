@@ -1,6 +1,7 @@
 import { MongoClient, ObjectId } from "mongodb";
 import { compareSync, hashSync } from "bcrypt";
 import { v4 as uuid } from "uuid";
+import dayjs from 'dayjs';
 import "dotenv/config";
 
 const URL = process.env.MONGO_URL;
@@ -76,7 +77,10 @@ export async function getEntries(uid) {
 export async function postEntry(uid, data) {
   try {
     const db = await connectToDb();
-    const entry = { uid, data };
+    const entry = { 
+      uid: uid,
+      data: {...data, date: dayjs().format("DD/MM")}
+    };
     console.log(entry);
     await db.collection(ENTRIES_COLLECTION).insertOne(entry);
     const response = await db.collection(ENTRIES_COLLECTION).find({}).toArray();
