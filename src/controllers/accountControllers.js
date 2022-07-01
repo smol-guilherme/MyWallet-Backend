@@ -23,3 +23,11 @@ export async function getDataEntries(req, res) {
   res.status(200).send(response);
   return;
 }
+
+export async function deleteDataEntry(req, res) {
+  const itemId = req.data;
+  console.log(itemId);
+
+  res.status(404).send("Erro provisorio rlx");
+  return
+}

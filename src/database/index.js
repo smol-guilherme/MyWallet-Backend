@@ -63,15 +63,16 @@ export async function validateUserToken(token) {
   }
 }
 
+// VAI QUEBRAR A EDIÇÃO OU NÃO, TEM QUE VER
 export async function getEntries(uid) {
   try {
     const db = await connectToDb();
-    console.log("userid", uid);
+    // console.log("userid", uid);
     const responseData = await db
       .collection(ENTRIES_COLLECTION)
       .aggregate([
         { $match: {} },
-        { $group: { _id: "$uid", total: { $sum: "$data.value" }, data: { $push: "$data" } } },
+        { $group: { _id: "$uid", total: { $sum: "$data.value" }, data: { $push: "$data" } } }
       ])
       .toArray();
       delete responseData[0]._id
@@ -89,9 +90,9 @@ export async function postEntry(uid, data) {
     const db = await connectToDb();
     const entry = {
       uid: uid,
-      data: { ...data, date: dayjs().format("DD/MM") },
+      data: { id: new ObjectId(), ...data, date: dayjs().format("DD/MM") },
     };
-    console.log(entry);
+    // console.log(entry);
     await db.collection(ENTRIES_COLLECTION).insertOne(entry);
     const response = await db.collection(ENTRIES_COLLECTION).find({}).toArray();
     return response;
@@ -108,7 +109,7 @@ async function getUser(userEmail) {
       .collection(USER_COLLECTION)
       .findOne({ email: userEmail });
     client.close();
-    console.log(user._id);
+    // console.log(user._id);
     return user;
   } catch (err) {
     console.log(err);
