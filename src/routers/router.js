@@ -9,6 +9,6 @@ router.post("/", userLogin);
 router.post("/signup", userSignup);
 router.get("/data", getDataEntries);
 router.post("/data", newDataEntry);
-router.delete("/data", deleteDataEntry)
+router.delete("/data/:id", deleteDataEntry)
 
 export default router;

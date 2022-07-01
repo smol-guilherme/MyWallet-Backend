@@ -63,11 +63,9 @@ export async function validateUserToken(token) {
   }
 }
 
-// VAI QUEBRAR A EDIÇÃO OU NÃO, TEM QUE VER
 export async function getEntries(uid) {
   try {
     const db = await connectToDb();
-    // console.log("userid", uid);
     const responseData = await db
       .collection(ENTRIES_COLLECTION)
       .aggregate([
@@ -77,7 +75,6 @@ export async function getEntries(uid) {
       .toArray();
       delete responseData[0]._id
       const response = {...responseData[0]}
-      console.log(response);
     return response;
   } catch (err) {
     console.log(err);
@@ -92,10 +89,25 @@ export async function postEntry(uid, data) {
       uid: uid,
       data: { id: new ObjectId(), ...data, date: dayjs().format("DD/MM") },
     };
-    // console.log(entry);
     await db.collection(ENTRIES_COLLECTION).insertOne(entry);
     const response = await db.collection(ENTRIES_COLLECTION).find({}).toArray();
     return response;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+export async function modifyEntry(iid, uid, deletionFlag) {
+  try {
+    const db = await connectToDb();
+    if(deletionFlag) {
+      const asdf = await db.collection(ENTRIES_COLLECTION).deleteOne({ "data.id": ObjectId(iid) });
+      console.log(asdf);
+      return await getEntries(uid);
+    }
+    await db.collection(ENTRIES_COLLECTION).updateOne({ "data.id": ObjectId(iid), $set: {}})
+    return await getEntries(uid);
   } catch (err) {
     console.log(err);
     return null;
@@ -109,7 +121,6 @@ async function getUser(userEmail) {
       .collection(USER_COLLECTION)
       .findOne({ email: userEmail });
     client.close();
-    // console.log(user._id);
     return user;
   } catch (err) {
     console.log(err);

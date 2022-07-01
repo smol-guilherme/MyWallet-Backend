@@ -1,4 +1,4 @@
-import { postEntry, validateUserToken, getEntries } from "../database/index.js";
+import { postEntry, validateUserToken, getEntries, modifyEntry } from "../database/index.js";
 
 export async function newDataEntry(req, res) {
   const newEntry = req.body;
@@ -25,9 +25,16 @@ export async function getDataEntries(req, res) {
 }
 
 export async function deleteDataEntry(req, res) {
-  const itemId = req.data;
-  console.log(itemId);
+  const itemId = req.params.id;
+  const userToken = req.header('authorization').replace("Bearer ", "");
+  // console.log(itemId);
 
-  res.status(404).send("Erro provisorio rlx");
-  return
+  const response = await modifyEntry(itemId, userToken, true);
+  if(response!== null) {
+    // console.log(response);
+    res.status(200).send(response);
+    return;
+  }
+  res.status(404).send("Objeto não encontrado");
+  return;
 }
