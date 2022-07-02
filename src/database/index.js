@@ -14,25 +14,13 @@ const SEC_FACTOR = 10;
 
 const client = new MongoClient(`mongodb://${URL}:${PORT}`);
 
-async function connectToDb() {
+export async function connectToDb() {
   try {
     await client.connect();
     return client.db(DB_NAME);
   } catch (err) {
     return err;
   }
-}
-
-export async function validateUserLogin(credentials) {
-  const user = await getUser(credentials.email);
-  if (user === null) {
-    return null;
-  }
-  if (compareSync(credentials.password, user.password)) {
-    const sessionData = addSessionToken(user);
-    return sessionData;
-  }
-  return false;
 }
 
 export async function userRegister(credentials) {
@@ -114,7 +102,7 @@ export async function modifyEntry(iid, uid, deletionFlag, data) {
   }
 }
 
-async function getUser(userEmail) {
+export async function getUser(userEmail) {
   try {
     const db = await connectToDb();
     const user = await db
@@ -128,7 +116,7 @@ async function getUser(userEmail) {
   }
 }
 
-async function addSessionToken(user) {
+export async function addSessionToken(user) {
   try {
     const db = await connectToDb();
     user.token = uuid();

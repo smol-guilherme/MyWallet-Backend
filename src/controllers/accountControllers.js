@@ -27,11 +27,9 @@ export async function getDataEntries(req, res) {
 export async function deleteDataEntry(req, res) {
   const itemId = req.params.id;
   const userToken = req.header('authorization').replace("Bearer ", "");
-  // console.log(itemId);
 
   const response = await modifyEntry(itemId, userToken, true);
   if(response!== null) {
-    // console.log(response);
     res.status(200).send(response);
     return;
   }
@@ -46,7 +44,6 @@ export async function updateDataEntry(req, res) {
   console.log("updating ", itemId, "\n", newEntry, "\nfim");
   const response = await modifyEntry(itemId, userToken, false, newEntry);
   if(response!== null) {
-    // console.log(response);
     res.status(200).send(response);
     return;
   }
