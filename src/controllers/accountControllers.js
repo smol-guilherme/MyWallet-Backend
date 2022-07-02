@@ -38,3 +38,18 @@ export async function deleteDataEntry(req, res) {
   res.status(404).send("Objeto não encontrado");
   return;
 }
+
+export async function updateDataEntry(req, res) {
+  const newEntry = req.body;
+  const itemId = req.params.id;
+  const userToken = req.header('authorization').replace("Bearer ", "");
+  console.log("updating ", itemId, "\n", newEntry, "\nfim");
+  const response = await modifyEntry(itemId, userToken, false, newEntry);
+  if(response!== null) {
+    // console.log(response);
+    res.status(200).send(response);
+    return;
+  }
+  res.status(404).send("Objeto não encontrado");
+  return;
+}

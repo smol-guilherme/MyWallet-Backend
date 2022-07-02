@@ -98,7 +98,7 @@ export async function postEntry(uid, data) {
   }
 }
 
-export async function modifyEntry(iid, uid, deletionFlag) {
+export async function modifyEntry(iid, uid, deletionFlag, data) {
   try {
     const db = await connectToDb();
     if(deletionFlag) {
@@ -106,7 +106,7 @@ export async function modifyEntry(iid, uid, deletionFlag) {
       console.log(asdf);
       return await getEntries(uid);
     }
-    await db.collection(ENTRIES_COLLECTION).updateOne({ "data.id": ObjectId(iid), $set: {}})
+    await db.collection(ENTRIES_COLLECTION).updateOne({ "data.id": ObjectId(iid) },{ $set: { ...data }})
     return await getEntries(uid);
   } catch (err) {
     console.log(err);
