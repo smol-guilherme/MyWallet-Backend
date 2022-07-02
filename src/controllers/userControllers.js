@@ -1,6 +1,6 @@
 import { addSessionToken, userRegister } from "../database/index.js";
 import { compareSync } from "bcrypt";
-  
+
 // 1-2*fix: validateUserLogin -> sanitizeData -> userLogin
 export async function userLogin(req, res) {
   const user = res.locals.user;
@@ -16,10 +16,12 @@ export async function userLogin(req, res) {
 }
 
 export async function userSignup(req, res) {
-  const credentials = req.body;
+  const credentials = res.locals.credentials;
   const response = await userRegister(credentials);
   if (response === null) {
-    return res.status(201).send();
+    res.status(201).send();
+    return;
   }
-  return res.status(409).send("Usuário já existe");
+  res.status(500).send("Erro ao processar a operação. Tente novamente.");
+  return;
 }

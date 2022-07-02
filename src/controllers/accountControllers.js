@@ -8,6 +8,7 @@ export async function newDataEntry(req, res) {
     res.status(404).send(false);
     return;
   }
+  // console.log(userId);
   const response = postEntry(userId, newEntry);
   return res.status(201).send(response);
 }

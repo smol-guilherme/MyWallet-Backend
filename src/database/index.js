@@ -40,8 +40,10 @@ export async function validateUserToken(token) {
     const response = await db
       .collection(SESSION_COLLECTION)
       .findOne({ token: token });
+    console.log(response);
+    // ISSO ACHO QUE É UM MIDDLEWARE
     if (response !== null) {
-      const user = await db.collection(USER_COLLECTION).findOne({});
+      const user = await db.collection(USER_COLLECTION).findOne({ _id: response.userId });
       return user._id;
     }
     return response;
@@ -57,7 +59,7 @@ export async function getEntries(uid) {
     const responseData = await db
       .collection(ENTRIES_COLLECTION)
       .aggregate([
-        { $match: {} },
+        { $match: { uid: uid } },
         { $group: { _id: "$uid", total: { $sum: "$data.value" }, data: { $push: "$data" } } }
       ])
       .toArray();
@@ -94,7 +96,7 @@ export async function modifyEntry(iid, uid, deletionFlag, data) {
       console.log(asdf);
       return await getEntries(uid);
     }
-    await db.collection(ENTRIES_COLLECTION).updateOne({ "data.id": ObjectId(iid) },{ $set: { ...data }})
+    await db.collection(ENTRIES_COLLECTION).updateOne({ "data.id": ObjectId(iid) }, { $set: { ...data }})
     return await getEntries(uid);
   } catch (err) {
     console.log(err);
