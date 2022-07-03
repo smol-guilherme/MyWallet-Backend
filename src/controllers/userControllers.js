@@ -5,7 +5,6 @@ import { compareSync } from "bcrypt";
 export async function userLogin(req, res) {
   const user = res.locals.user;
   const credentials = res.locals.credentials;
-  console.log(credentials);
   if (compareSync(credentials.password, user.password)) {
     const sessionData = await addSessionToken(user);
     res.status(200).send(sessionData);

@@ -7,6 +7,5 @@ export default function sanitizeData(data) {
           output[param] = (stripHtml(data[param]).result).trim();
         }
     }
-    console.log(output);
     return output;
 }

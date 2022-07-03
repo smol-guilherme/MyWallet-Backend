@@ -1,17 +1,22 @@
-export async function validateUserToken(req, res) {
+import { connectToDb } from "../database/index.js";
+
+const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
+
+export default async function validateUserToken(req, res, next) {
   try {
+    const userToken = req.header('authorization').replace("Bearer ", "");
     const db = await connectToDb();
     const response = await db
       .collection(SESSION_COLLECTION)
-      .findOne({ token: token });
-    if (response !== null) {
-      const user = await db.collection(USER_COLLECTION).findOne({});
-      return user._id;
+      .findOne({ token: userToken });
+    if(response === null) {
+      res.status(404).send();
     }
-    res.status(404).send();
-    return;
+    res.locals.userData = response;
+    next();
   } catch (err) {
     console.log(err);
-    return null;
+    res.status(500).send();
+    return;
   }
 }

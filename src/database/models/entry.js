@@ -1,18 +1,18 @@
-import Joi, { not } from "joi";
+import Joi from "joi";
 
-const messageSchema = Joi.object({
-  value: Joi.number().valid(not(0)).min(1).max(12).required(),
+const emtrySchema = Joi.object({
+  value: Joi.number().precision(2).required(),
   description: Joi.string().min(1).max(64).required(),
 });
 
-export default async function validateMessage(data) {
+export default async function validateEntry(data) {
   try {
-    const response = await messageSchema.validateAsync(data, {
+    const response = await emtrySchema.validateAsync(data, {
       abortEarly: false,
     });
-    console.log(response);
-    return true;
+    return response;
   } catch (err) {
-    return false;
+    console.log(err);
+    return null;
   }
 }

@@ -34,37 +34,26 @@ export async function userRegister(credentials) {
   return null;
 }
 
-export async function validateUserToken(token) {
+export async function getEntries(uData) {
   try {
     const db = await connectToDb();
-    const response = await db
-      .collection(SESSION_COLLECTION)
-      .findOne({ token: token });
-    console.log(response);
-    // ISSO ACHO QUE É UM MIDDLEWARE
-    if (response !== null) {
-      const user = await db.collection(USER_COLLECTION).findOne({ _id: response.userId });
-      return user._id;
-    }
-    return response;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-}
-
-export async function getEntries(uid) {
-  try {
-    const db = await connectToDb();
+    console.log(uData);
     const responseData = await db
       .collection(ENTRIES_COLLECTION)
       .aggregate([
-        { $match: { uid: uid } },
-        { $group: { _id: "$uid", total: { $sum: "$data.value" }, data: { $push: "$data" } } }
+        { $match: { uid: uData.userId } },
+        {
+          $group: {
+            _id: "$uid",
+            total: { $sum: "$data.value" },
+            data: { $push: "$data" },
+          },
+        },
       ])
       .toArray();
-      delete responseData[0]._id
-      const response = {...responseData[0]}
+    console.log(responseData);
+    delete responseData[0]._id;
+    const response = { ...responseData[0] };
     return response;
   } catch (err) {
     console.log(err);
@@ -72,15 +61,18 @@ export async function getEntries(uid) {
   }
 }
 
-export async function postEntry(uid, data) {
+export async function postEntry(uData, data) {
   try {
     const db = await connectToDb();
     const entry = {
-      uid: uid,
-      data: { id: new ObjectId(), ...data, date: dayjs().format("DD/MM") },
+      uid: uData.userId,
+      data: { id: ObjectId(), ...data, date: dayjs().format("DD/MM") },
     };
     await db.collection(ENTRIES_COLLECTION).insertOne(entry);
-    const response = await db.collection(ENTRIES_COLLECTION).find({}).toArray();
+    const response = await db
+      .collection(ENTRIES_COLLECTION)
+      .find({ uid: uData.userId })
+      .toArray();
     return response;
   } catch (err) {
     console.log(err);
@@ -91,12 +83,23 @@ export async function postEntry(uid, data) {
 export async function modifyEntry(iid, uid, deletionFlag, data) {
   try {
     const db = await connectToDb();
-    if(deletionFlag) {
-      const asdf = await db.collection(ENTRIES_COLLECTION).deleteOne({ "data.id": ObjectId(iid) });
-      console.log(asdf);
+    if (deletionFlag) {
+      const asdf = await db
+        .collection(ENTRIES_COLLECTION)
+        .deleteOne({ "data.id": ObjectId(iid) });
       return await getEntries(uid);
     }
-    await db.collection(ENTRIES_COLLECTION).updateOne({ "data.id": ObjectId(iid) }, { $set: { ...data }})
+    await db
+      .collection(ENTRIES_COLLECTION)
+      .updateOne(
+        { "data.id": ObjectId(iid) },
+        {
+          $set: {
+            "data.value": data.value,
+            "data.description": data.description,
+          },
+        }
+      );
     return await getEntries(uid);
   } catch (err) {
     console.log(err);

@@ -6,7 +6,6 @@ import validateSignup from "../database/models/register.js";
 // *fix: now 1-2 instead of 1-3
 export default async function validateSignupData(req, res, next) {
   const credentials = await validateSignup(sanitizeData(req.body));
-  console.log(credentials);
   const user = await getUser(credentials.email);
   if (user !== null) {
     const message = "Usuário já existe";

@@ -1,35 +1,34 @@
-import { postEntry, validateUserToken, getEntries, modifyEntry } from "../database/index.js";
-
-export async function newDataEntry(req, res) {
-  const newEntry = req.body;
-  const userToken = req.header('authorization').replace("Bearer ", "");
-  const userId = await validateUserToken(userToken);
-  if (userId === null) {
-    res.status(404).send(false);
-    return;
-  }
-  // console.log(userId);
-  const response = postEntry(userId, newEntry);
-  return res.status(201).send(response);
-}
+import { postEntry, getEntries, modifyEntry } from "../database/index.js";
+import validateEntry from "../database/models/entry.js";
+import sanitizeData from "../database/models/sanitizeData.js"
 
 export async function getDataEntries(req, res) {
-  const userToken = req.header('authorization').replace("Bearer ", "");
-  const userId = await validateUserToken(userToken);
-  if (!userId) {
-    res.status(401).send(false);
+  const userData = res.locals.userData
+  const response = await getEntries(userData);
+  if(response !== null) {
+    res.status(200).send(response);
     return;
   }
-  const response = await getEntries(userId);
-  res.status(200).send(response);
+  res.status(500).send();
+  return;
+}
+
+export async function newDataEntry(req, res) {
+  const newEntry = await validateEntry(sanitizeData(req.body));
+  if(newEntry === null) {
+    res.status(422).send();
+    return;
+  }
+  const userData = res.locals.userData;
+  const response = await postEntry(userData, newEntry);
+  res.status(201).send(response);
   return;
 }
 
 export async function deleteDataEntry(req, res) {
+  const userData = res.locals.userData
   const itemId = req.params.id;
-  const userToken = req.header('authorization').replace("Bearer ", "");
-
-  const response = await modifyEntry(itemId, userToken, true);
+  const response = await modifyEntry(itemId, userData, true);
   if(response!== null) {
     res.status(200).send(response);
     return;
@@ -38,12 +37,12 @@ export async function deleteDataEntry(req, res) {
   return;
 }
 
+// Rever isso aqui passo a passo, mas depois aaaaaaaaaaaaaaaaaaaaa
 export async function updateDataEntry(req, res) {
-  const newEntry = req.body;
+  const updatedEntry = await validateEntry(sanitizeData(req.body));
   const itemId = req.params.id;
-  const userToken = req.header('authorization').replace("Bearer ", "");
-  console.log("updating ", itemId, "\n", newEntry, "\nfim");
-  const response = await modifyEntry(itemId, userToken, false, newEntry);
+  const userData = res.locals.userData
+  const response = await modifyEntry(itemId, userData, false, updatedEntry);
   if(response!== null) {
     res.status(200).send(response);
     return;
