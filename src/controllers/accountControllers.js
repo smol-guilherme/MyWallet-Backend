@@ -37,7 +37,6 @@ export async function deleteDataEntry(req, res) {
   return;
 }
 
-// Rever isso aqui passo a passo, mas depois aaaaaaaaaaaaaaaaaaaaa
 export async function updateDataEntry(req, res) {
   const updatedEntry = await validateEntry(sanitizeData(req.body));
   const itemId = req.params.id;

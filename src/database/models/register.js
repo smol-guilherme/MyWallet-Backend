@@ -13,6 +13,7 @@ export default async function validateSignup(signup) {
     });
     return signup;
   } catch (err) {
+    console.log(err);
     return null;
   }
 }

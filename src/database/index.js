@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
-import { compareSync, hashSync } from "bcrypt";
+import { hashSync } from "bcrypt";
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 import "dotenv/config";
@@ -37,7 +37,6 @@ export async function userRegister(credentials) {
 export async function getEntries(uData) {
   try {
     const db = await connectToDb();
-    console.log(uData);
     const responseData = await db
       .collection(ENTRIES_COLLECTION)
       .aggregate([
@@ -51,7 +50,6 @@ export async function getEntries(uData) {
         },
       ])
       .toArray();
-    console.log(responseData);
     delete responseData[0]._id;
     const response = { ...responseData[0] };
     return response;

@@ -1,7 +1,6 @@
 import { addSessionToken, userRegister } from "../database/index.js";
 import { compareSync } from "bcrypt";
 
-// 1-2*fix: validateUserLogin -> sanitizeData -> userLogin
 export async function userLogin(req, res) {
   const user = res.locals.user;
   const credentials = res.locals.credentials;
