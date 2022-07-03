@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 import "dotenv/config";
 
-const URL = process.env.MONGO_URL;
+const URL = process.env.MONGO_URI;
 const PORT = process.env.MONGO_PORT;
 const DB_NAME = process.env.MONGO_DB_NAME;
 const USER_COLLECTION = process.env.MONGO_USERS_COLLECTION;
@@ -13,9 +13,8 @@ const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
 const SEC_FACTOR = 10;
 const A_SECOND = 1000;
 
-const client = new MongoClient(`mongodb://${URL}:${PORT}`);
+const client = new MongoClient(`${URL}`);
 const pId = setInterval(clearSessions, 2*60*A_SECOND);
-clearSessions();
 
 async function clearSessions() {
   function fifteenMinutesAgo() {

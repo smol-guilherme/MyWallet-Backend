@@ -4,7 +4,7 @@ import userRouter from "./routers/userRouter.js"
 import entryRouter from "./routers/entryRouter.js"
 import "dotenv/config";
 
-const PORT_IN_USE = process.env.PRIMARY_PORT || process.env.SECONDARY_PORT;
+const PORT_IN_USE = process.env.PORT;
 
 const server = express();
 server.use(cors());
