@@ -10,8 +10,8 @@ export default async function validateUser(user) {
     const response = await userSchema.validateAsync(user, {
       abortEarly: false,
     });
-    return user;
+    return response;
   } catch (err) {
-    return null;
+    return err.details[0];
   }
 }

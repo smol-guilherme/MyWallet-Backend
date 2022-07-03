@@ -159,6 +159,7 @@ export async function updateSessionToken(user) {
   try {
     const db = await connectToDb();
     await db.collection(SESSION_COLLECTION).updateOne({ token: user.token }, { $set : { lastSessionTime: Date.now() } })
+    return;
   } catch (err) {
     console.log(err);
     return null;
