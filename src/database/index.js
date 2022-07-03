@@ -11,8 +11,26 @@ const USER_COLLECTION = process.env.MONGO_USERS_COLLECTION;
 const ENTRIES_COLLECTION = process.env.MONGO_DATA_COLLECTION;
 const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
 const SEC_FACTOR = 10;
+const A_SECOND = 1000;
 
 const client = new MongoClient(`mongodb://${URL}:${PORT}`);
+const pId = setInterval(clearSessions, 2*60*A_SECOND);
+clearSessions();
+
+async function clearSessions() {
+  function fifteenMinutesAgo() {
+    return (Date.now() - 15*60*A_SECOND)
+  }
+
+  try {
+    const db = await connectToDb();
+    const response = await db.collection(SESSION_COLLECTION).deleteMany({ lastSessionTime: { $lt: fifteenMinutesAgo() } });
+    return;
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+}
 
 export async function connectToDb() {
   try {
@@ -125,12 +143,22 @@ export async function addSessionToken(user) {
     user.token = uuid();
     await db
       .collection(SESSION_COLLECTION)
-      .insertOne({ userId: ObjectId(user._id), token: user.token });
+      .insertOne({ userId: ObjectId(user._id), token: user.token, lastSessionTime: Date.now() });
     const response = {
       name: user.name,
       token: user.token,
     };
     return response;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+export async function updateSessionToken(user) {
+  try {
+    const db = await connectToDb();
+    await db.collection(SESSION_COLLECTION).updateOne({ token: user.token }, { $set : { lastSessionTime: Date.now() } })
   } catch (err) {
     console.log(err);
     return null;

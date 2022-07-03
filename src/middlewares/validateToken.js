@@ -1,4 +1,4 @@
-import { connectToDb } from "../database/index.js";
+import { connectToDb, updateSessionToken } from "../database/index.js";
 
 const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
 
@@ -13,6 +13,7 @@ export default async function validateUserToken(req, res, next) {
       res.status(404).send();
     }
     res.locals.userData = response;
+    updateSessionToken(response);
     next();
   } catch (err) {
     console.log(err);
