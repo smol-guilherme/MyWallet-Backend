@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import { hashSync } from "bcrypt";
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
@@ -13,7 +13,7 @@ const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
 const SEC_FACTOR = 10;
 const A_SECOND = 1000;
 
-const client = new MongoClient(`${URL}`);
+const client = new MongoClient(`${URL}`, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const pId = setInterval(clearSessions, 2*60*A_SECOND);
 
 async function clearSessions() {
