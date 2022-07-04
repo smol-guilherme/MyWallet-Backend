@@ -8,7 +8,8 @@
   "license": "ISC",
   "description": "",
   "scripts": {
-    "start": "node ./src/server.js"
+    "start": "node ./src/server.js",
+    "dev": "nodemon ./src/server.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
