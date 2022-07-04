@@ -13,14 +13,13 @@ const SESSION_COLLECTION = process.env.MONGO_SESSION_COLLECTION;
 const SEC_FACTOR = 10;
 const A_SECOND = 1000;
 
-const client = new MongoClient(`${URL}`, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const client = new MongoClient(URL);
 const pId = setInterval(clearSessions, 2*60*A_SECOND);
-
+clearSessions();
 async function clearSessions() {
   function fifteenMinutesAgo() {
     return (Date.now() - 15*60*A_SECOND)
   }
-
   try {
     const db = await connectToDb();
     const response = await db.collection(SESSION_COLLECTION).deleteMany({ lastSessionTime: { $lt: fifteenMinutesAgo() } });
