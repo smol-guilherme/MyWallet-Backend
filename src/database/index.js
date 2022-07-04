@@ -14,15 +14,17 @@ const SEC_FACTOR = 10;
 const A_SECOND = 1000;
 
 const client = new MongoClient(URL);
-const pId = setInterval(clearSessions, 2*60*A_SECOND);
+const pId = setInterval(clearSessions, 2 * 60 * A_SECOND);
 clearSessions();
 async function clearSessions() {
   function fifteenMinutesAgo() {
-    return (Date.now() - 15*60*A_SECOND)
+    return Date.now() - 15 * 60 * A_SECOND;
   }
   try {
     const db = await connectToDb();
-    const response = await db.collection(SESSION_COLLECTION).deleteMany({ lastSessionTime: { $lt: fifteenMinutesAgo() } });
+    const response = await db
+      .collection(SESSION_COLLECTION)
+      .deleteMany({ lastSessionTime: { $lt: fifteenMinutesAgo() } });
     return;
   } catch (err) {
     console.log(err);
@@ -66,9 +68,12 @@ export async function getEntries(uData) {
         },
       ])
       .toArray();
-    delete responseData[0]._id;
-    const response = { ...responseData[0] };
-    return response;
+    if(responseData.length !== 0) {
+      delete responseData[0]._id;
+      const response = { ...responseData[0] };
+      return response;
+    }
+    return responseData;
   } catch (err) {
     console.log(err);
     return null;
@@ -103,17 +108,15 @@ export async function modifyEntry(iid, uid, deletionFlag, data) {
         .deleteOne({ "data.id": ObjectId(iid) });
       return await getEntries(uid);
     }
-    await db
-      .collection(ENTRIES_COLLECTION)
-      .updateOne(
-        { "data.id": ObjectId(iid) },
-        {
-          $set: {
-            "data.value": data.value,
-            "data.description": data.description,
-          },
-        }
-      );
+    await db.collection(ENTRIES_COLLECTION).updateOne(
+      { "data.id": ObjectId(iid) },
+      {
+        $set: {
+          "data.value": data.value,
+          "data.description": data.description,
+        },
+      }
+    );
     return await getEntries(uid);
   } catch (err) {
     console.log(err);
@@ -141,7 +144,11 @@ export async function addSessionToken(user) {
     user.token = uuid();
     await db
       .collection(SESSION_COLLECTION)
-      .insertOne({ userId: ObjectId(user._id), token: user.token, lastSessionTime: Date.now() });
+      .insertOne({
+        userId: ObjectId(user._id),
+        token: user.token,
+        lastSessionTime: Date.now(),
+      });
     const response = {
       name: user.name,
       token: user.token,
@@ -156,7 +163,12 @@ export async function addSessionToken(user) {
 export async function updateSessionToken(user) {
   try {
     const db = await connectToDb();
-    await db.collection(SESSION_COLLECTION).updateOne({ token: user.token }, { $set : { lastSessionTime: Date.now() } })
+    await db
+      .collection(SESSION_COLLECTION)
+      .updateOne(
+        { token: user.token },
+        { $set: { lastSessionTime: Date.now() } }
+      );
     return;
   } catch (err) {
     console.log(err);
